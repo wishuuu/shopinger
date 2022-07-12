@@ -1,6 +1,7 @@
 ﻿namespace Shopinger.Domain.SearchCriterias;
 
-public abstract class SearchCriteria
+public abstract class SearchCriteria<TEntity>
+    where TEntity : BaseClassEntity
 {
     
 }

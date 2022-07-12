@@ -3,6 +3,7 @@ using Bogus;
 using Microsoft.Extensions.Options;
 using Shopinger.Domain;
 using Shopinger.Domain.Repositories;
+using Shopinger.Domain.SearchCriterias;
 
 namespace Shopinger.Infrastructure.Fakers;
 
@@ -11,31 +12,31 @@ public class FakeRepositoryOptions
     public int Count { get; set; }
 }
 
-public class FakeEntityRepository<TEntity> : IEntityRepository<TEntity>
+public abstract class FakeEntityRepository<TEntity> : IEntityRepository<TEntity>
     where TEntity : BaseClassEntity
 {
-    protected readonly IEnumerable<TEntity> entities;
+    protected readonly IEnumerable<TEntity> Entities;
     
     public FakeEntityRepository(Faker<TEntity> faker, IOptions<FakeRepositoryOptions> options)
     {
-        entities = faker.Generate(options.Value.Count);
+        Entities = faker.Generate(options.Value.Count);
     }
 
     public IEnumerable<TEntity> GetAll()
     {
-        return entities;
+        return Entities;
     }
 
     public TEntity GetById(int id)
     {
-        return entities.FirstOrDefault(x => x.Id == id);
+        return Entities.FirstOrDefault(x => x.Id == id);
     }
 
     public void Add(TEntity entity)
     {
-        var id = entities.Max(x => x.Id);
+        var id = Entities.Max(x => x.Id);
         entity.Id = ++id;
-        entities.Append(entity);
+        Entities.Append(entity);
     }
 
     public void Update(TEntity entity)
@@ -48,6 +49,8 @@ public class FakeEntityRepository<TEntity> : IEntityRepository<TEntity>
         
         entityToUpdate.CopyProperties(entity);
     }
+
+    public abstract IEnumerable<TEntity> Search(SearchCriteria<TEntity> criteria);
 
     public Task<IEnumerable<TEntity>> GetAllAsync()
     {
@@ -76,7 +79,5 @@ public class FakeEntityRepository<TEntity> : IEntityRepository<TEntity>
         {
             return Task.FromException(e);
         }
-        
-        
     }
 }
